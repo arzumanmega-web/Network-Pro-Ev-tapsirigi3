@@ -10,7 +10,7 @@ namespace Network_Pro_Ev_tapsirigi3
 {
     public class GameZone
     {
-        static public IPAddress? IP { get; set; }
+        public string? IP { get; set; }
         public int local_port { get; set; }
         public int remote_port { get; set; }
         public string? GamerNameA { get; set; }
@@ -161,7 +161,8 @@ namespace Network_Pro_Ev_tapsirigi3
             Console.Write("Oyuncu adinizi daxil edin: ");
             gameZone.GamerNameA = Console.ReadLine();
 
-            GameZone.IP = IPAddress.Parse("192.168.1.82");
+            gameZone.IP = "192.168.1.82";
+            var IP = IPAddress.Parse(gameZone.IP);
             Console.Write("Öz portunuzu daxil edin (mes: 27001): ");
             gameZone.local_port = int.Parse(Console.ReadLine()!);
 
@@ -170,7 +171,7 @@ namespace Network_Pro_Ev_tapsirigi3
 
 
             udpClient = new UdpClient(gameZone.local_port);
-            remoteEndPoint = new IPEndPoint(GameZone.IP, gameZone.remote_port);
+            remoteEndPoint = new IPEndPoint(IP, gameZone.remote_port);
 
 
             Console.WriteLine("\nSimvolunuzu secin:");
