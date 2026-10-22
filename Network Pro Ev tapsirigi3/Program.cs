@@ -10,7 +10,7 @@ namespace Network_Pro_Ev_tapsirigi3
 {
     public class GameZone
     {
-        public IPAddress? IP { get; set; }
+        static public IPAddress? IP { get; set; }
         public int local_port { get; set; }
         public int remote_port { get; set; }
         public string? GamerNameA { get; set; }
@@ -105,6 +105,50 @@ namespace Network_Pro_Ev_tapsirigi3
 
     internal class Program
     {
+        public static void JsonSerialize(GameZone gameZone)
+        {
+            var json = new JsonSerializer();
+
+            using (var sw = new StreamWriter("GameZone.json"))
+            {
+                using (var jw = new JsonTextWriter(sw))
+                {
+                    json.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    json.TypeNameHandling = TypeNameHandling.All;
+                    json.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                    json.Serialize(jw, gameZone);
+                }
+            }
+
+
+
+        }
+
+        public static GameZone JsonDeserialize()
+        {
+            if (!File.Exists("GameZone.json"))
+            {
+                return new GameZone();
+            }
+            var json = new JsonSerializer();
+            GameZone? gameZone = null;
+
+            using (var sw = new StreamReader("GameZone.json"))
+            {
+
+                using (var jw = new JsonTextReader(sw))
+                {
+
+                    json.TypeNameHandling = TypeNameHandling.All;
+                    json.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                    gameZone = json.Deserialize<GameZone>(jw);
+
+                }
+            }
+            if (gameZone == null) { return new GameZone(); }
+            return gameZone;
+
+        }
 
         private static UdpClient? udpClient;
         private static IPEndPoint? remoteEndPoint;
@@ -112,12 +156,12 @@ namespace Network_Pro_Ev_tapsirigi3
         static void Main(string[] args)
         {
             Console.WriteLine("Tic-Tac-Toe oyununa xos gelmisiniz...\n");
-            GameZone gameZone = new GameZone();
+            GameZone gameZone = JsonDeserialize();
 
             Console.Write("Oyuncu adinizi daxil edin: ");
             gameZone.GamerNameA = Console.ReadLine();
 
-            gameZone.IP = IPAddress.Parse("192.168.1.82");
+            GameZone.IP = IPAddress.Parse("192.168.1.82");
             Console.Write("Öz portunuzu daxil edin (mes: 27001): ");
             gameZone.local_port = int.Parse(Console.ReadLine()!);
 
@@ -126,7 +170,7 @@ namespace Network_Pro_Ev_tapsirigi3
 
 
             udpClient = new UdpClient(gameZone.local_port);
-            remoteEndPoint = new IPEndPoint(gameZone.IP, gameZone.remote_port);
+            remoteEndPoint = new IPEndPoint(GameZone.IP, gameZone.remote_port);
 
 
             Console.WriteLine("\nSimvolunuzu secin:");
@@ -189,7 +233,7 @@ namespace Network_Pro_Ev_tapsirigi3
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         gameZone.GameWinnerName = gameZone.GamerNameA;
-                        Console.WriteLine($"\n{gameZone.GamerNameA} oyunu qazandi...");
+                        Console.WriteLine($"\n{gameZone.GamerNameA} oyunu qazandin...");
                         Console.ResetColor();
                         break;
                     }
@@ -210,7 +254,8 @@ namespace Network_Pro_Ev_tapsirigi3
                     if (gameZone.CheckGame())
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"\n{gameZone.GamerNameA} oyunu uduzdu...");
+                        gameZone.GameWinnerName = gameZone.GamerNameB;
+                        Console.WriteLine($"\n{gameZone.GamerNameA} oyunu uduzdun...");
                         Console.ResetColor();
                         break;
                     }
@@ -225,7 +270,7 @@ namespace Network_Pro_Ev_tapsirigi3
             {
                 Console.WriteLine("\nOyun berabere bitdi...");
             }
-
+            JsonSerialize(gameZone);
             Console.WriteLine("\nCixmaq ucun her hansisa duymeye basin...");
             Console.ReadKey();
         }
